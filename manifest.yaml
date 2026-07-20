@@ -3,30 +3,33 @@ apiVersion: 0.2.2
 
 builder:
   image: image
-  context: smoke-test # smoke-test folder
-  dockerfile: ./build/ray.Dockerfile # need ray installed
+  dockerfile: ./build/Dockerfile
+  context: .
+#engineName: main-gcp-dev-d4f2ce98b4f34cdb 
 
 spec:
-  operator: kuberay
+  operator: jax
   image: image
-  command: "python3 -u main.py --operator=kuberay --sleep=300 --tb-write=True"
-
-  debug:
-    jupyter: false
+  command: "python3 -u main.py --operator=jax --sleep=300 --tb-write=True"     
 
   tensorboard:
     enabled: true
+  #storage:
+  #  attachExistingPVCs:
+  #    - name: gcp-proj1-6d711b00ee9e4a67-pvc1-03c0573f7ac54bbd 
+  #      mountPoint: /mnt/gcp-proj1-6d711b00ee9e4a67-pvc1-03c0573f7ac54bbd  
+
 
   types:
-    Head:
+    worker:
+      count: 1
       resources:
-        cpus: 1
-        ramRatio: 2
-
-    Workers:
-      - name: cpu-workers
-        count: 1
-        resources:
-          cpus: 1
-          ramRatio: 2
-          shmSizeGB: 0
+        cpus: 2 
+        ramRatio: 4
+        shmSizeGB: 0
+        accelerators: # optional
+        
+          gpu:
+            count: 0
+            type: gpu
+            product: nvidia-tesla-t4
